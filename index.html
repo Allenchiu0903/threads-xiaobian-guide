@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threads 自動發文小編 — 安裝與使用指南</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root {
+    --bg: #faf9f6;
+    --fg: #1a1a1a;
+    --muted: #6b6b6b;
+    --card: #ffffff;
+    --border: #e5e2db;
+    --accent: #b5651d;
+    --accent-bg: #fbeee0;
+    --code-bg: #f0eee8;
+  }
+  [data-theme="dark"] {
+    --bg: #1a1816;
+    --fg: #ece7de;
+    --muted: #a39a8c;
+    --card: #232019;
+    --border: #35302a;
+    --accent: #e0975a;
+    --accent-bg: #3a2c1e;
+    --code-bg: #2a251e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1a1816;
+      --fg: #ece7de;
+      --muted: #a39a8c;
+      --card: #232019;
+      --border: #35302a;
+      --accent: #e0975a;
+      --accent-bg: #3a2c1e;
+      --code-bg: #2a251e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.75;
+    transition: background .2s, color .2s;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 100px; }
+  header.top {
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 760px; margin: 0 auto; padding: 20px 20px 0;
+  }
+  .brand { font-weight: 700; font-size: 15px; color: var(--muted); letter-spacing: .02em; }
+  .toggle-btn {
+    border: 1px solid var(--border); background: var(--card); color: var(--fg);
+    border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer;
+  }
+  .hero { padding: 24px 0 8px; }
+  .hero h1 { font-size: 26px; margin: 0 0 10px; line-height: 1.4; }
+  .hero p.lead { color: var(--muted); font-size: 15px; margin: 0 0 20px; }
+  .progress-note {
+    background: var(--accent-bg); border-radius: 10px; padding: 12px 16px;
+    font-size: 13px; color: var(--accent); margin-bottom: 28px;
+  }
+  nav.steps {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 32px;
+  }
+  nav.steps a {
+    font-size: 12px; padding: 5px 10px; border-radius: 14px;
+    border: 1px solid var(--border); color: var(--muted); text-decoration: none;
+  }
+  nav.steps a:hover { border-color: var(--accent); color: var(--accent); }
+  .cost-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0 24px; }
+  .cost-table th, .cost-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .cost-table th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  section.step {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 24px; margin-bottom: 18px; scroll-margin-top: 20px;
+  }
+  section.step h2 {
+    font-size: 17px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px;
+  }
+  .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent-bg); color: var(--accent); font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step-time { color: var(--muted); font-size: 12px; margin: 0 0 14px 36px; }
+  .step-body { margin-left: 36px; font-size: 14.5px; }
+  .step-body ol, .step-body ul { padding-left: 20px; }
+  .step-body p { margin: 8px 0; }
+  code, .inline-code {
+    background: var(--code-bg); padding: 1px 6px; border-radius: 5px;
+    font-size: 13px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .say-box {
+    background: var(--accent-bg); border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 6px; margin: 10px 0; font-size: 14px;
+  }
+  details.ai-instruction {
+    margin-top: 12px; border: 1px dashed var(--border); border-radius: 8px; padding: 10px 14px;
+  }
+  details.ai-instruction summary {
+    cursor: pointer; font-size: 12.5px; color: var(--muted);
+  }
+  details.ai-instruction table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+  details.ai-instruction th, details.ai-instruction td { border-bottom: 1px solid var(--border); padding: 5px 8px; text-align: left; }
+  .file-map { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .file-map th, .file-map td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  .file-map th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  .faq-item { margin-bottom: 14px; }
+  .faq-item .q { font-weight: 600; font-size: 14.5px; margin-bottom: 4px; }
+  .faq-item .a { color: var(--muted); font-size: 14px; }
+  .daily-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .daily-table th, .daily-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .footer-note {
+    text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 40px;
+  }
+  h3.section-title {
+    font-size: 14px; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--muted); margin: 40px 0 14px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span class="brand">Threads 自動發文小編</span>
+  <button class="toggle-btn" id="themeToggle" type="button">🌓 深色模式</button>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>52 歲老闆的 AI 內容引擎 — 安裝與使用指南</h1>
+    <p class="lead">你說一句主題，AI 產出一篇 2000 字以上、帶你真實故事的長文，自動過三關審核，切好 Threads 串文——你只負責最後按下發布。系統跑在你自己的電腦裡，資料 100% 屬於你。</p>
+    <div class="progress-note">感謝購買。這頁是你的安裝手冊，照著步驟做，全程大約 1.5–2 小時可以跑完第一篇文章。卡住的每一步都算我們的缺陷，回信 <strong>allenchiu0903@gmail.com</strong> 直接說。</div>
+    <p style="margin-bottom:28px;"><a href="core-pack.zip" style="display:inline-block; background:var(--accent); color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600;">⬇ 下載 core-pack（7 個檔案）</a></p>
+  </div>
+
+  <nav class="steps">
+    <a href="#step0">準備</a>
+    <a href="#step1">安裝 Claude Code</a>
+    <a href="#step2">放好資料夾</a>
+    <a href="#step3">啟動</a>
+    <a href="#step4">安裝精靈</a>
+    <a href="#step5">故事素材</a>
+    <a href="#step6">第一篇長文</a>
+    <a href="#step7">切串文發布</a>
+    <a href="#step8">手機回報</a>
+    <a href="#daily">日常使用</a>
+    <a href="#files">檔案地圖</a>
+    <a href="#faq">常見問題</a>
+  </nav>
+
+  <section class="step" id="step0">
+    <h2><span class="step-num">0</span>開始前你需要準備（成本透明）</h2>
+    <div class="step-body">
+      <table class="cost-table">
+        <tr><th>項目</th><th>費用</th><th>說明</th></tr>
+        <tr><td>一台電腦</td><td>你已有的就行</td><td>Mac 或 Windows 都可以，不需要新電腦</td></tr>
+        <tr><td>Claude 訂閱</td><td>US$20/月起</td><td>AI 引擎的費用，付給 Anthropic 官方，到 claude.ai 註冊後升級 Pro 方案</td></tr>
+        <tr><td>Threads 帳號</td><td>免費</td><td>你發文的地方，手機下載 Threads App 註冊</td></tr>
+      </table>
+      <p>沒有其他隱藏費用。本包第一版採手動發布（你自己在手機貼文），不需要申請任何開發者帳號。選配的「手機回報」（第 8 步）只需要免費的 Telegram，三分鐘申請，不用審核。</p>
+    </div>
+  </section>
+
+  <section class="step" id="step1">
+    <h2><span class="step-num">1</span>安裝 Claude Code</h2>
+    <p class="step-time">約 10 分鐘</p>
+    <div class="step-body">
+      <p>Claude Code 是 Anthropic 官方的 AI 工作工具，這套系統靠它運轉。</p>
+      <ol>
+        <li>打開你電腦上任何一個網頁瀏覽器（Chrome、Safari、Edge 都可以），在網址列輸入 <code>claude.ai/code</code>（或搜尋「Claude Code 安裝」找官方頁面）</li>
+        <li>照官方指示安裝（Mac 與 Windows 都有官方安裝器）</li>
+        <li>安裝完成後，用你的 Claude 帳號登入</li>
+      </ol>
+      <p>卡住了？官方安裝頁有中文說明；或先跳到本頁最下方「常見問題」。</p>
+    </div>
+  </section>
+
+  <section class="step" id="step2">
+    <h2><span class="step-num">2</span>放好這個包</h2>
+    <p class="step-time">約 5 分鐘</p>
+    <div class="step-body">
+      <ol>
+        <li>打開檔案管理程式（Mac 叫「Finder」、Windows 叫「檔案總管」），找到你下載的 <code>core-pack</code> 資料夾</li>
+        <li>在資料夾上按右鍵 → 複製，貼到「文件」底下，然後右鍵 → 重新命名，改名為「我的AI內容引擎」</li>
+        <li>記住這個位置，以後所有工作都在這個資料夾裡發生</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="step" id="step3">
+    <h2><span class="step-num">3</span>啟動</h2>
+    <p class="step-time">約 2 分鐘</p>
+    <div class="step-body">
+      <ol>
+        <li>打開「終端機」（Mac：按鍵盤 ⌘＋空白鍵，輸入 Terminal，按 Enter；Windows：按開始鍵，輸入 PowerShell，按 Enter）</li>
+        <li>你會看到一個黑色（或白色）的文字視窗——這是正常的，不用緊張，接下來只需要打兩行字</li>
+        <li>輸入 <code>cd </code>（cd 後面有一個空格），然後用滑鼠把「我的AI內容引擎」資料夾按住、拖曳到這個文字視窗上放開（路徑會自動出現），按 Enter</li>
+        <li>輸入 <code>claude</code>，按 Enter——看到 Claude 跟你打招呼，就成功了</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="step" id="step4">
+    <h2><span class="step-num">4</span>安裝精靈</h2>
+    <p class="step-time">約 15 分鐘</p>
+    <div class="step-body">
+      <p>對 Claude 說：</p>
+      <div class="say-box">「開始安裝」</div>
+      <p>它會照精靈指示，一題一題問你，然後自動把答案填進系統檔案。你只要像聊天一樣回答。</p>
+      <details class="ai-instruction">
+        <summary>給 AI 的安裝精靈指示（技術細節，不用自己看懂）</summary>
+        <table>
+          <tr><th>順序</th><th>問題</th><th>注意事項</th></tr>
+          <tr><td>1</td><td>署名要用什麼名字？</td><td>—</td></tr>
+          <tr><td>2</td><td>你的年齡？</td><td>會成為文章的身份標記，真實才有力量</td></tr>
+          <tr><td>3</td><td>一句話介紹自己（年齡＋反差＋具體事）</td><td>幫用戶打磨到三要素齊備才收下</td></tr>
+          <tr><td>4</td><td>真實可驗證的實績數字</td><td>只填真的，答不出來就填「暫無，累積中」</td></tr>
+          <tr><td>5</td><td>固定結語怎麼寫？</td><td>定了就不再改，是品牌資產</td></tr>
+          <tr><td>6</td><td>有電子報或部落格嗎？</td><td>沒有就整段留空，之後可補</td></tr>
+        </table>
+      </details>
+    </div>
+  </section>
+
+  <section class="step" id="step5">
+    <h2><span class="step-num">5</span>寫下你的故事素材</h2>
+    <p class="step-time">約 30 分鐘，最重要的一步</p>
+    <div class="step-body">
+      <p>AI 寫出來的文章好不好，九成取決於這一步。</p>
+      <p>對 Claude 說：</p>
+      <div class="say-box">「幫我建故事素材」</div>
+      <p>Claude 會像採訪一樣問你 3–5 個真實經歷（一次失敗、一次轉折、一個具體數字的時刻、一個讓你改變做法的瞬間），整理後存進 <code>stories/我的故事素材.md</code>。</p>
+      <p>只講真的。這套系統的規則是：寧可標「待補」，不編造。</p>
+    </div>
+  </section>
+
+  <section class="step" id="step6">
+    <h2><span class="step-num">6</span>跑通第一條流程</h2>
+    <p class="step-time">約 20 分鐘</p>
+    <div class="step-body">
+      <ol>
+        <li>對 Claude 說：<div class="say-box">「寫長文：我為什麼開始用 AI」（或你自己的主題）</div></li>
+        <li>Claude 會先給你段落大綱 → 你說 OK → 產出一篇 2000 字以上的長文草稿</li>
+        <li>對 Claude 說：<div class="say-box">「送審」</div> → 系統自動跑三關審核，給你通過或打回的報告</li>
+        <li>打回就照報告修（可以請 Claude 指出要改哪裡，但改不改、怎麼改由你決定），修完再說「送審」</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="step" id="step7">
+    <h2><span class="step-num">7</span>切串文＋發布</h2>
+    <p class="step-time">約 10 分鐘</p>
+    <div class="step-body">
+      <p>過審後，對 Claude 說：</p>
+      <div class="say-box">「切串文」</div>
+      <p>它會把長文切成每則 500 字以內的 Threads 串文（第 1/N 格式，結語在最後一則）。</p>
+      <p>然後打開手機 Threads：</p>
+      <ol>
+        <li>貼出第 1 則（一般發文）</li>
+        <li>發出後，點開自己剛發的這則貼文，按下方的「回覆」按鈕，貼上第 2 則，發出</li>
+        <li>之後每一則都是「回覆上一則」——像自己接自己的話，讀者就會看到一串連續的內容</li>
+        <li>全部貼完，完成</li>
+      </ol>
+      <p><strong>發布永遠由你的手按下去。</strong> 這是系統的設計，不是限制——AI 永遠碰不到你的帳號。</p>
+    </div>
+  </section>
+
+  <section class="step" id="step8">
+    <h2><span class="step-num">8</span>手機回報（選配，強烈建議）</h2>
+    <p class="step-time">約 10 分鐘</p>
+    <div class="step-body">
+      <p>裝了這一步，AI 完成工作（草稿寫完、審核通過或打回）會直接傳訊息到你的手機 Telegram——你人在外面談生意，也知道系統跑到哪了。</p>
+      <p>沒用過 Telegram？它是一個免費通訊 App（類似 LINE）。這一步完全可以先跳過，系統其他功能不受影響。</p>
+      <ol>
+        <li>手機安裝 Telegram（免費，App Store / Google Play 搜尋）</li>
+        <li>在 Telegram 搜尋 <code>@BotFather</code>（官方機器人，有藍勾勾）→ 傳 <code>/newbot</code> → 照提示取名字 → 拿到一串 token（長得像 <code>123456:ABC-DEF...</code>），複製起來</li>
+        <li>對 Claude 說：<div class="say-box">「設定手機回報」</div>，把 token 貼給它——精靈會完成剩下的事</li>
+      </ol>
+      <details class="ai-instruction">
+        <summary>給 AI 的手機回報設定指示（技術細節）</summary>
+        <p style="font-size:12.5px; color:var(--muted);">向用戶要 BotFather 給的 token → 呼叫 getUpdates 取得 chat id → 建立 config/tg.json → 複製 tg-notify-template.py 為 tg-notify.py → 發一則測試訊息確認成功。提醒用戶 token 不要分享、不要截圖給別人。</p>
+      </details>
+    </div>
+  </section>
+
+  <h3 class="section-title" id="daily">日常使用</h3>
+  <section class="step">
+    <table class="daily-table">
+      <tr><th>你說</th><th>系統做</th></tr>
+      <tr><td>「寫長文：〔主題〕」</td><td>出大綱 → 你確認 → 產 2000 字草稿 → 📱 手機通知（若已設定第 8 步）</td></tr>
+      <tr><td>「送審」</td><td>三關審核，給通過/打回報告 → 📱 手機通知結果</td></tr>
+      <tr><td>「切串文」</td><td>過審文切成 Threads 串文，你手動發布</td></tr>
+    </table>
+  </section>
+
+  <h3 class="section-title" id="files">檔案地圖</h3>
+  <section class="step">
+    <table class="file-map">
+      <tr><th>檔案</th><th>用途</th></tr>
+      <tr><td><code>CLAUDE.md</code>（安裝後）</td><td>系統中樞——Claude 每次啟動都讀它</td></tr>
+      <tr><td><code>PROMPT-長文產出-template.md</code></td><td>產文規則書（字數、格式、開場、禁用詞的唯一真相）</td></tr>
+      <tr><td><code>SOP-送審流程-template.md</code></td><td>三關審核步驟書</td></tr>
+      <tr><td><code>PERSONA-寫作教練-template.md</code></td><td>審稿教練的五條硬規則＋你的判例庫（會越用越準）</td></tr>
+      <tr><td><code>stories/我的故事素材.md</code>（第 5 步建立）</td><td>你的真實故事庫——產文品質的命脈</td></tr>
+      <tr><td><code>tg-notify-template.py</code></td><td>手機回報腳本（第 8 步設定後啟用）</td></tr>
+      <tr><td><code>scripts-manifest.md</code></td><td>進階自動化清單（自動發文、產圖——選配，之後再說）</td></tr>
+      <tr><td><code>冷啟動測試.md</code></td><td>裝完後的自我驗收表，10 分鐘確認系統裝好了</td></tr>
+    </table>
+  </section>
+
+  <h3 class="section-title" id="faq">常見問題</h3>
+  <section class="step">
+    <div class="faq-item">
+      <div class="q">Q：我完全不會程式，真的裝得起來嗎？</div>
+      <div class="a">全程只有兩個終端機動作：cd＋拖資料夾、輸入 claude。其餘都是「對 AI 說話」。這套包的設計標準是：照著做就能通，卡住的每一步都算我們的缺陷，回報給我們。</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">Q：換電腦怎麼辦？</div>
+      <div class="a">整個資料夾複製過去，重裝 Claude Code，繼續用。你的故事素材、判例庫、所有文章都在資料夾裡。</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">Q：AI 會不會亂編我的經歷？</div>
+      <div class="a">系統規則明文禁止：缺資料標「⬜ 待補」，不自行補全。而且發布前你會親眼審過每一個字——發布權永遠在你手上。</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">Q：為什麼不能自動發文？</div>
+      <div class="a">可以，那是進階模組（見 scripts-manifest.md），需要申請 Meta 開發者帳號。我們刻意不放在第一天：先讓系統跑起來、你先發出前幾篇，再決定要不要自動化。</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">Q：卡住了怎麼辦？（SOS 三步）</div>
+      <div class="a">
+        1. 先問 Claude：把你卡住的畫面或錯誤訊息直接描述給它，多數問題它能當場帶你解決。<br>
+        2. 重開一次：關掉終端機視窗，照第 3 步重來一遍。<br>
+        3. 還是不行：記下你卡在第幾步＋畫面上的文字，回信 <strong>allenchiu0903@gmail.com</strong>。你卡住的每一步都算我們的缺陷，不是你的問題。
+      </div>
+    </div>
+  </section>
+
+  <p class="footer-note">核心包 v0 ／ 裝完請跑一次「冷啟動測試」的驗收表 ／ 有問題歡迎來信 allenchiu0903@gmail.com</p>
+
+</div>
+
+<script>
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('theme');
+  if (stored) root.setAttribute('data-theme', stored);
+  btn.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+</script>
+
+</body>
+</html>
